@@ -1,0 +1,9 @@
+<funcion>
+  <parametros>x</parametros>
+  <codigo>
+    <if>
+      <condicion>x => 10</condicion>
+      <codigo>y = 2;</codigo>
+    </if>
+  </codigo>
+</funcion>

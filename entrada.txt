@@ -8,7 +8,7 @@
  <codigo>z = 100;</codigo>
  </if>
  <do>
- <codigo>x = x + 1;</codigo> 
+ <codigo>x = x + 1;</codigo>
  <condicion>x < 100</condicion>
  </do>
  </codigo>

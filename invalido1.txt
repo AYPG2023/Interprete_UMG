@@ -1,0 +1,6 @@
+<funcion>
+  <parametros>x, , 25, </parametros>
+  <codigo>
+    x = 10;
+  </codigo>
+</funcion>

@@ -1,0 +1,10 @@
+<funcion>
+  <parametros>a, b</parametros>
+  <codigo>
+    a = 5;
+    b = 10;
+    <if>
+      <condicion>a < b</condicion>
+      <codigo>resultado = b - a;</codigo>
+  </codigo>
+</funcion>

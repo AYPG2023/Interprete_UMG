@@ -1,0 +1,16 @@
+<funcion>
+  <parametros>a, b</parametros>
+  <codigo>a = 5;</codigo>
+</funcion>
+
+<funcion>
+  <parametros>x, y, 50</parametros>
+  <codigo>
+    x = 10;
+    y = 20;
+    <if>
+      <condicion>x < y</condicion>
+      <codigo>resultado = y - x;</codigo>
+    </if>
+  </codigo>
+</funcion>

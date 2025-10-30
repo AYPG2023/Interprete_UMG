@@ -189,54 +189,69 @@ class Parser:
         invalid_count = 0
         is_block_valid = True
 
-        # <parametros> de apertura
         self.expect_tag("parametros", closing=False)
-        expecting_value = True
+        expecting_value = True  # True: espero valor; False: espero coma o cierre
 
         while True:
-            token = self.current_token()
+            tok = self.current_token()
 
-            # ¿llegamos al cierre </parametros>?
-            if token.type == "TAG_CLOSE" and self.tag_name(token) == "parametros":
+            if tok.type == "TAG_CLOSE" and self.tag_name(tok) == "parametros":
+                if expecting_value and (valid_count + invalid_count) > 0:
+                    invalid_count += 1
+                    is_block_valid = False
+                    self.errors.append(
+                        f"Error sintáctico: parámetro vacío al final de <parametros> en línea {tok.line}."
+                    )
                 break
-            if token.type == "EOF":
+
+            if tok.type == "EOF":
                 raise ParserError("fin de archivo inesperado en <parametros>.")
 
             if expecting_value:
-                if token.type in {"IDENT", "NUMBER"}:
+                if tok.type in {"IDENT", "NUMBER"}:
                     self.advance()
                     valid_count += 1
                     expecting_value = False
+                elif tok.type == "COMMA":
+                    self.advance()
+                    invalid_count += 1
+                    is_block_valid = False
+                    self.errors.append(
+                        f"Error sintáctico: parámetro vacío en línea {tok.line}."
+                    )
+                    expecting_value = True
                 else:
                     invalid_count += 1
                     is_block_valid = False
                     self.errors.append(
-                        f"Error sintáctico: parámetro inválido '{token.value}' en línea {token.line}."
+                        f"Error sintáctico: parámetro inválido '{tok.value}' en línea {tok.line}."
                     )
-                    self.consume_until_closing_tag("parametros")
-                    break
+                    while self.current_token().type not in {"COMMA", "TAG_CLOSE", "EOF"}:
+                        self.advance()
+                    if self.current_token().type == "COMMA":
+                        self.advance()
+                        expecting_value = True
             else:
-                # después de un valor esperamos coma o el cierre
-                if token.type == "COMMA":
+                if tok.type == "COMMA":
                     self.advance()
                     expecting_value = True
-                elif token.type == "TAG_CLOSE" and self.tag_name(token) == "parametros":
-                    break
+                elif tok.type == "TAG_CLOSE" and self.tag_name(tok) == "parametros":
+                    continue
                 else:
+                    invalid_count += 1
                     is_block_valid = False
                     self.errors.append(
-                        f"Error sintáctico: se esperaba ',' en línea {token.line}."
+                        f"Error sintáctico: se esperaba ',' en línea {tok.line}."
                     )
-                    self.consume_until_closing_tag("parametros")
-                    break
+                    while self.current_token().type not in {"COMMA", "TAG_CLOSE", "EOF"}:
+                        self.advance()
+                    if self.current_token().type == "COMMA":
+                        self.advance()
+                        expecting_value = True
 
-        # </parametros> de cierre
         self.expect_tag("parametros", closing=True)
-
-        # actualizar métricas por elemento
         self.stats["Parámetros válidos"] += valid_count
         self.stats["Parámetros inválidos"] += invalid_count
-
         return is_block_valid and (invalid_count == 0)
 
     def parse_code_block(self) -> None:
@@ -574,7 +589,7 @@ def main(filename: str) -> None:
 
 
 if __name__ == "__main__":
-    input_file = "entrada.txt"
+    input_file = "invalido4.txt"
     input_path = Path(input_file)
 
     if not input_path.exists():
